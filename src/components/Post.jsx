@@ -1,9 +1,8 @@
 /* eslint-disable react/jsx-key */
-/* eslint-disable no-unused-vars */
 /* eslint-disable react/prop-types */
 import { format, formatDistanceToNow } from 'date-fns';
-// para usar o formato
 import ptBR from 'date-fns/locale/pt-BR';
+import { useState } from 'react';
 
 import { Avatar } from './Avatar';
 import { Comment } from './Comment';
@@ -11,6 +10,10 @@ import { Comment } from './Comment';
 import styles from './Post.module.css';
 
 export function Post({ author, publishedAt, content }) {
+  const [comments, setComments] = useState(['Post muito bacana, hein?!']);
+
+  const [newCommentText, setNewCommentText] = useState('');
+
   const publishedDateFormatted = format(
     publishedAt,
     "d 'de' LLLL 'às' HH:mm'h'",
@@ -18,12 +21,23 @@ export function Post({ author, publishedAt, content }) {
       locale: ptBR,
     }
   );
-  // formatDistanceToNow faz a funcao de calcular o tempo do post com o dia de hoje
+
   const publishedDateRelativeToNow = formatDistanceToNow(publishedAt, {
     locale: ptBR,
-    // adiciona a string = há mais de
     addSuffix: true,
   });
+
+  function handleCrateNewComment() {
+    event.preventDefault();
+
+    setComments([...comments, newCommentText]);
+    setNewCommentText('');
+  }
+
+  function handleNewCommentChange() {
+    setNewCommentText(event.target.value);
+  }
+
   return (
     <article className={styles.post}>
       <header>
@@ -57,10 +71,15 @@ export function Post({ author, publishedAt, content }) {
         })}
       </div>
 
-      <form className={styles.commentForm}>
+      <form onSubmit={handleCrateNewComment} className={styles.commentForm}>
         <strong>Deixe seu feedback</strong>
 
-        <textarea placeholder="Deixe um comentário" />
+        <textarea
+          name="comment"
+          placeholder="Deixe um comentário"
+          value={newCommentText}
+          onChange={handleNewCommentChange}
+        />
 
         <footer>
           <button type="submit">Publicar</button>
@@ -68,9 +87,9 @@ export function Post({ author, publishedAt, content }) {
       </form>
 
       <div className={styles.commentList}>
-        <Comment />
-        <Comment />
-        <Comment />
+        {comments.map((comment) => {
+          return <Comment content={comment} />;
+        })}
       </div>
     </article>
   );
